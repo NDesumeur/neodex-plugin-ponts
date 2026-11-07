@@ -1,0 +1,22 @@
+{
+  "id": "neodex.ponts",
+  "name": "Ponts",
+  "version": "1.0.0",
+  "author": "NDesumeur",
+  "description": "Relie toutes les îles par des ponts droits, un ou deux entre deux îles, sans croisement. Le chiffre de chaque île dit combien de ponts en partent.",
+  "icon": "icon.png",
+  "entry": "index.js",
+  "view": "ponts",
+  "neobase": ">=4.0.0",
+  "type": "app",
+  "category": "Jeux",
+  "syncMode": "progression",
+  "syncInfo": "Records de temps, archipels reliés.",
+  "mobile": false,
+  "system": false,
+  "dependencies": {},
+  "sdk": "2.1.0",
+  "permissions": [
+    "storage"
+  ]
+}
