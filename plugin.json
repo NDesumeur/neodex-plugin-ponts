@@ -3,7 +3,7 @@
   "name": "Ponts",
   "version": "1.0.0",
   "author": "NDesumeur",
-  "description": "Relie toutes les îles par des ponts droits, un ou deux entre deux îles, sans croisement. Le chiffre de chaque île dit combien de ponts en partent.",
+  "description": "Casse-tête logique : relie toutes les îles par des ponts droits, un ou deux entre deux îles voisines, sans croisement, pour former un seul archipel. Le chiffre de chaque île dit combien de ponts en partent ; elle devient verte quand c'est juste. Glisser pour poser un pont, retour arrière pour annuler, archipels au hasard de 7 × 7 ou 9 × 9 et record de temps.",
   "icon": "icon.png",
   "entry": "index.js",
   "view": "ponts",
