@@ -1,9 +1,9 @@
 {
   "pluginId": "neodex.ponts",
   "repo": "NDesumeur/neodex-plugin-ponts",
-  "version": "1.0.0",
-  "sha256": "fd153a0ea28040e250ae9a162c385f0d94a412ddcad47d48bd5ba74b07857e2b",
-  "approvedAt": "2026-11-07T17:30:59.722Z",
+  "version": "1.0.1",
+  "sha256": "61cac0ba79c6e8413465f8c4c19bc7d89e238cc211abe98b7db6da8ea1e2323b",
+  "approvedAt": "2026-11-08T12:10:49.651Z",
   "neobase": ">=4.0.0",
-  "signature": "HwZZMqM9tpCNuEVj9xiqMp+8D7Sm59Y60KvQ2TTv/MUD8BvYIcRx4kaIehMF/eLJH1oC1dCUzw4c55znhiBNDw=="
+  "signature": "4LKHWnIKrtiduwTM6juCOC8J29zclxqsDW6PTjLYMmmE8F+jzC/85OjW1idH/Myb8IYZ6JyX9LYmYnpxb3FhAQ=="
 }
