@@ -1,4 +1,6 @@
 {
+ "11 × 11": "11 × 11",
+ "13 × 13": "13 × 13",
  "ARCHIPEL RELIÉ !": "ARCHIPELAGO CONNECTED!",
  "Aa": "Aa",
  "Ac": "Ac",
@@ -7,7 +9,7 @@
  "Archipel": "Archipelago",
  "Archipels reliés": "Connected archipelagos",
  "Backspace": "Backspace",
- "Casse-tête logique : relie toutes les îles par des ponts droits, un ou deux entre deux îles voisines, sans croisement, pour former un seul archipel. Le chiffre de chaque île dit combien de ponts en partent ; elle devient verte quand c'est juste. Glisser pour poser un pont, retour arrière pour annuler, archipels au hasard de 7 × 7 ou 9 × 9 et record de temps.": "A logic puzzle: connect all the islands with straight bridges, one or two between neighbouring islands, with no crossings, to form a single archipelago. Each island's number says how many bridges leave it; it turns green when right. Drag to place a bridge, Backspace to undo, random 7 × 7 or 9 × 9 archipelagos and time records.",
+ "Casse-tête logique : relie toutes les îles par des ponts droits, un ou deux entre deux îles voisines, sans croisement, pour former un seul archipel. Le chiffre de chaque île dit combien de ponts en partent ; elle devient verte quand c'est juste. Glisser pour poser un pont, retour arrière pour annuler, archipels au hasard de 7 × 7 ou 9 × 9 et record de temps. Archipels de 7 × 7 à 13 × 13, plein écran et jeu à la taille de l'écran.": "A logic puzzle: connect all the islands with straight bridges, one or two between neighbouring islands, with no crossings, to form a single archipelago. Each island's number says how many bridges leave it; it turns green when right. Drag to place a bridge, Backspace to undo, random 7 × 7 or 9 × 9 archipelagos and time records. Archipelagos from 7 × 7 to 13 × 13, full screen and a game that fits the screen.",
  "Ce plugin doit être approuvé par NeoDex pour s'ouvrir.": "This plugin must be approved by NeoDex to open.",
  "Clic : nouvel archipel": "Click: new archipelago",
  "Cz": "Cz",
@@ -49,6 +51,7 @@
  "Oa": "Oh",
  "Oc": "Oc",
  "Od": "Od",
+ "PLEIN ÉCRAN": "FULL SCREEN",
  "PONTS": "BRIDGES",
  "Ponts": "Bridges",
  "RECORDS": "RECORDS",

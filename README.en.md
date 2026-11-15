@@ -23,7 +23,11 @@ Any solution that follows these rules is accepted, even if it differs from the i
 
 ## Sizes
 
-**Archipelago** 7 × 7 or 9 × 9. The number of islands and the timer are shown at the top.
+Four archipelagos: **7 × 7** (about a dozen islands), **9 × 9**, **11 × 11** and **13 × 13** (up to about forty islands). The cells shrink with the size so the whole archipelago fits. Each size keeps its own record.
+
+## Full screen
+
+The **Full screen** button fills the whole screen with the archipelago (Escape to leave). Otherwise the game takes all the height the window leaves.
 
 ## Statistics
 

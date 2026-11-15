@@ -23,7 +23,11 @@ Toute solution qui respecte ces règles est acceptée, même si elle diffère de
 
 ## Tailles
 
-**Archipel** 7 × 7 ou 9 × 9. Le nombre d'îles et le chronomètre sont affichés en haut.
+Quatre archipels : **7 × 7** (une douzaine d'îles), **9 × 9**, **11 × 11** et **13 × 13** (jusqu'à une quarantaine d'îles). Les cases rétrécissent avec la taille pour que tout l'archipel tienne. Chaque taille garde son record.
+
+## Plein écran
+
+Le bouton **Plein écran** agrandit l'archipel à tout l'écran (Échap pour en sortir). Hors plein écran, le jeu prend toute la hauteur que laisse la fenêtre.
 
 ## Statistiques
 

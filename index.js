@@ -2,22 +2,24 @@
 // Jeu NeoDex en pixel art dessiné à la main (police bitmap, cadres et boutons en pixels). Il tourne dans le bac à sable de NeoDex.
 const HTML = `<div class="appWrap wide">
   <div class="agHead"><span class="label">Ponts</span><span class="hint">Glisser d'une île vers sa voisine : 1 pont, 2 ponts, aucun · Retour : annuler</span></div>
-  <div class="gMain"><div class="gameBox"><canvas id="gc" width="204" height="212"></canvas></div>
+  <div class="gMain"><div class="gameBox"><canvas id="gc" width="260" height="268"></canvas></div>
     <div class="gSide">
       <div class="sysCard"><b>RECORDS</b><div class="gStats" id="gStats"></div></div>
-      <div class="row"><button class="btn main" id="gNew">NOUVELLE PARTIE</button></div>
-      <label class="row">Archipel <select id="poSize" class="f"><option value="0">7 × 7</option><option value="1">9 × 9</option></select></label>
+      <div class="row"><button class="btn main" id="gNew">NOUVELLE PARTIE</button><button class="btn" id="gFs">PLEIN ÉCRAN</button></div>
+      <label class="row">Archipel <select id="poSize" class="f"><option value="0">7 × 7</option><option value="1">9 × 9</option><option value="2">11 × 11</option><option value="3">13 × 13</option></select></label>
       <div class="hint">Une île devient verte quand elle a juste son nombre de ponts, rouge quand elle en a trop.</div><div class="hint">Les ponts ne se croisent jamais, et toutes les îles doivent former un seul archipel.</div>
     </div></div>
 </div>`;
 const CSS = `.gMain{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
-.gameBox{display:grid;place-items:center;padding:10px;background:#05010b;flex:2;min-width:320px;position:relative}
+.gameBox{display:grid;place-items:center;padding:10px;background:#05010b;flex:1 1 360px;min-width:min(100%,320px);position:relative}
+.gameBox:fullscreen{padding:0}
+.gameBox:fullscreen canvas{width:min(100vw,calc(100vh * 260 / 268))}
 .gameBox canvas{width:100%;image-rendering:pixelated;cursor:var(--cp,pointer);touch-action:none}
 .gSide{display:flex;flex-direction:column;gap:14px;flex:1;min-width:250px;max-width:420px}
 .gSide .sysCard{display:flex;flex-direction:column}
 .gStats{display:grid;grid-template-columns:1fr auto;gap:4px 14px}
 .gStats b{text-align:right}
-.gameBox canvas{max-width:480px;aspect-ratio:204/212}`;
+.gameBox canvas{width:min(100%,max(280px,calc((100vh - 170px) * 260 / 268)));height:auto;aspect-ratio:260/268}`;
 /* ---------- l'habillage pixel art, dessiné à la main : police bitmap (accents compris), cadres, boutons, icônes ----------
    Tout est en pixels pleins, agrandis par 2 sans lissage : aucun dégradé, aucune ombre floue. */
 const PXK = (() => {
@@ -289,7 +291,7 @@ export default async function (ctx) {
   view.innerHTML = HTML;
   pxSkin(view.querySelector('.appWrap'), { title: "PONTS", T: {"k": "#030a14", "k2": "#08162a", "fill": "#0e2240", "fillOn": "#143058", "hl": "#1c3a6a", "line": "#2e5a9a", "acc": "#ffa030", "accL": "#ffe0a0", "accS": "#c86a10", "accD": "#4a2406", "rivet": "#ffe0a0", "btn": "#1c3a6a", "btnHi": "#4a7ac0", "btnLo": "#08162a", "btnHov": "#1c4478", "btnHovHi": "#6a9ae0", "text": "#eef6ff", "muted": "#a8c0e0", "acc2": "#5fdf6a", "gold": "#ffd84a", "orange": "#ffa030", "red": "#ff4a5a", "green": "#7ee07a", "green2": "#2f8a3a", "bg": "#040c1a", "bgDot": "#0e2240", "bgDot2": "#08162a", "spark": "#2e5a9a", "spark2": "#5fdf6a", "tile": ["................", "...:............", "................", "..........+.....", "................", "................", ".....:..........", "................", "................", ".............:..", "................", "..+.............", "................", ".........:......", "................", "................"]},
   emblem: ["............", ".kkk....kkk.", "koook..koook", "kowokookowok", "koook..koook", ".kkk....kkk.", "..o.........", "..o.........", ".kkk........", "koookooo....", "kowok.......", ".kkk........"],
-  icons: [[/^NOUVELLE/, "play"], [/^RECORDS/, "crown"]] });
+  icons: [[/^NOUVELLE/, "play"], [/^PLEIN/, "full"], [/^RECORDS/, "crown"]] });
   const $ = id => view.querySelector('#' + id) || document.getElementById(id);
   const doc = async n => { try { return await folder.read(n); } catch { return null; } };
   const games = { best: {}, ...(await doc('games')) };
@@ -322,7 +324,7 @@ const clock = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStar
 // petits outils communs aux jeux : une toile pré-dessinée, la position du pointeur dans le canevas, un bip
 const cnv = (w, h, fn) => { const c = el('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; fn(g); return c; };
 const spr = (rows, pal) => cnv(Math.max(...rows.map(r => r.length)), rows.length, g => sprite(g, rows, 0, 0, pal));
-const W = 204, H = 212, cv = $('gc'), g = cv.getContext('2d'); g.imageSmoothingEnabled = false;
+const W = 260, H = 268, cv = $('gc'), g = cv.getContext('2d'); g.imageSmoothingEnabled = false;
 const cpos = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H]; };
 let actx = null;
 const beep = (f, d = .1, type = 'square', slide = 0, vol = .08) => { try { actx ??= new AudioContext(); const o = actx.createOscillator(), gn = actx.createGain(), t = actx.currentTime; o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + d); gn.gain.setValueAtTime(vol, t); gn.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(gn).connect(actx.destination); o.start(t); o.stop(t + d + .02); } catch {} };
@@ -331,8 +333,9 @@ const showStats = rows => $('gStats').replaceChildren(...rows.flatMap(([a, b]) =
 
 /* ---------- Ponts : relier toutes les îles par des ponts droits (un ou deux entre deux îles), sans croisement. Le chiffre d'une île dit combien de ponts en partent. ---------- */
 const PO = {C: 20, Y0: 24};
+const poCell = n => Math.min(32, Math.floor((W - 24) / n));
 const pos = gstore('ponts', {size: 0, done: 0});
-const PO_SIZES = [7, 9];
+const PO_SIZES = [7, 9, 11, 13];
 let po = null;
 const poKey = (i, j) => i < j ? i + '-' + j : j + '-' + i;
 function poCross(isl, br, a, b) {  // le pont a-b croiserait-il un pont existant ?
@@ -359,8 +362,8 @@ function poGen(n, seed) {  // on fait pousser un archipel relié, pont après po
   return {isl, sol: br};
 }
 function poNew() {
-  const n = PO_SIZES[pos.size], {isl} = poGen(n, Math.floor(Math.random() * 1e9));
-  po = Object.assign(po || {tick: 0, raf: 0}, {mode: 'play', n, isl, br: new Map(), X0: Math.floor((W - n * PO.C) / 2), drag: null, t0: performance.now(), endAt: 0, hist: []}); poInfo();
+  const n = PO_SIZES[pos.size] || 7, {isl, sol} = poGen(n, Math.floor(Math.random() * 1e9)); PO.C = poCell(n);
+  po = Object.assign(po || {tick: 0, raf: 0}, {mode: 'play', n, isl, sol, br: new Map(), X0: Math.floor((W - n * PO.C) / 2), drag: null, t0: performance.now(), endAt: 0, hist: []}); poInfo();
 }
 const poCount = i => [...po.br].reduce((a, [k, c]) => a + (k.split('-').map(Number).includes(i) ? c : 0), 0);
 function poDone() {
@@ -388,10 +391,10 @@ function poDraw() {
   if (po.drag?.to >= 0) { const [x1, y1] = poXY(po.isl[po.drag.from]), [x2, y2] = poXY(po.isl[po.drag.to]); for (let t = 0; t <= 1; t += .04) px(g, '#ffffff', x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, 1, 1); }
   po.isl.forEach((s, i) => { const c = poCount(i), [x, y] = poXY(s); g.drawImage(c === s.n ? PO_IS.ok : c > s.n ? PO_IS.over : PO_IS.wait, x - 8, y - 8); pxFont(g, String(s.n), x + 1, y + 4, '#2a1a0a', 7, 'center'); });
   const sec = Math.floor(((po.mode === 'won' ? po.wonMs : performance.now()) - po.t0) / 1000);
-  pxFont(g, po.isl.length + ' îles', po.X0, 14, '#c8d8ff', 6); pxFont(g, clock(sec), po.X0 + po.n * PO.C, 14, '#ffffff', 6, 'right');
+  pxFont(g, po.isl.length + ' îles', Math.max(6, po.X0), 14, '#c8d8ff', 6); pxFont(g, clock(sec), Math.min(W - 6, po.X0 + po.n * PO.C), 14, '#ffffff', 6, 'right');
   if (po.mode === 'won' && po.tick - po.endAt > 20) gameText(g, W, [['ARCHIPEL RELIÉ !', '#5fdf6a', 10], ['en ' + clock(sec), '#ffffff'], ['Clic : nouvel archipel', '#ffd84a']], H / 2 - 10);
 }
-const poAt = e => { const [mx, my] = cpos(e); return po.isl.findIndex(s => { const [x, y] = poXY(s); return Math.hypot(mx - x, my - y) < 10; }); };
+const poAt = e => { const [mx, my] = cpos(e); return po.isl.findIndex(s => { const [x, y] = poXY(s); return Math.hypot(mx - x, my - y) < Math.max(9, PO.C / 2); }); };
 const poDir = (i, e) => { const [mx, my] = cpos(e), [x, y] = poXY(po.isl[i]), dx = mx - x, dy = my - y; if (Math.hypot(dx, dy) < 8) return -1; return Math.abs(dx) > Math.abs(dy) ? poNeighbor(po.isl, i, Math.sign(dx), 0, po.n) : poNeighbor(po.isl, i, 0, Math.sign(dy), po.n); };
 cv.onpointerdown = e => { e.preventDefault(); if (!po) return; if (po.mode === 'won') { if (po.tick - po.endAt > 20) poNew(); return; } const i = poAt(e); if (i >= 0) { po.drag = {from: i, to: -1}; cv.setPointerCapture(e.pointerId); } };
 cv.onpointermove = e => { if (po?.drag) po.drag.to = poDir(po.drag.from, e); };
@@ -399,9 +402,11 @@ cv.onpointerup = () => { if (po?.drag) { if (po.drag.to >= 0) poToggle(po.drag.f
 document.addEventListener('keydown', e => { if (!keyOk(e) || !po) return; if (e.key === 'Backspace') { e.preventDefault(); const h = po.hist.pop(); if (h && po.mode === 'play') po.br.set(h[0], h[1]); } });
 function poInfo() { const b = games.best['ponts' + PO_SIZES[pos.size]]; showStats([['Record ' + PO_SIZES[pos.size] + ' × ' + PO_SIZES[pos.size], b ? clock(b) : '—'], ['Archipels reliés', pos.done]]); $('poSize').value = pos.size; }
 $('gNew').onclick = () => { poNew(); $('gNew').blur(); };
+$('gFs').onclick = () => { $('gFs').blur(); try { document.fullscreenElement ? document.exitFullscreen() : cv.parentElement.requestFullscreen?.().catch(() => {}); } catch {} };
+cv.__po = {st: () => po, toggle: (i, j) => poToggle(i, j), xy: s => poXY(s), W, H};
 $('poSize').onchange = () => { pos.size = +$('poSize').value; saveGames(); poNew(); $('poSize').blur(); };
 {  // vérification : la solution du générateur est acceptée (chiffres justes, sans croisement, tout relié)
-  let ok = true; for (const s of [1, 2, 3, 99]) { const {isl, sol} = poGen(9, s), keep = po; po = {isl, br: sol}; ok &&= isl.length > 8 && poDone() && ![...sol.keys()].some(k => { const [a, b] = k.split('-').map(Number), m = new Map(sol); m.delete(k); return poCross(isl, m, a, b); }); po = keep; }
+  let ok = true; for (const [n, s] of [[9, 1], [9, 2], [9, 3], [9, 99], [11, 4], [11, 5], [13, 6], [13, 7], [13, 8]]) { const {isl, sol} = poGen(n, s), keep = po; po = {isl, br: sol}; ok &&= isl.length > n * n / 6 && poDone() && ![...sol.keys()].some(k => { const [a, b] = k.split('-').map(Number), m = new Map(sol); m.delete(k); return poCross(isl, m, a, b); }); po = keep; }
   console.assert(ok, 'ponts');
 }
 ctx.onOpen(() => { if (!po) poNew(); gameLoop(po, 'ponts', () => {}, poDraw); poInfo(); });
