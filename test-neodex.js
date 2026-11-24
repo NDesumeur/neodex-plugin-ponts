@@ -20,6 +20,14 @@ module.exports = async ({ pj, sleep }) => {
     if (r[2] !== 'won') throw new Error('archipel ' + r[0] + ' non relié');
     if (v >= 2) await shot('1-' + r[0] + '-fini');
   }
+  // l'archipel du jour : le même à chaque départ ; l'indice montre un pont forcé (ou de la solution), puis le pose au second clic
+  if (await pj(`document.getElementById('gc').dataset.selfcheck`) !== 'ok') throw new Error('vérification interne');
+  const day = []; for (let k = 0; k < 2; k++) { await pj(`document.getElementById('poDaily').click(), 0`); await sleep(300); day.push(await C('return po.daily + ":" + po.n + ":" + JSON.stringify(po.isl);')); }
+  if (day[0] !== day[1] || !day[0].startsWith('true:9')) throw new Error('archipel du jour');
+  await pj(`document.getElementById('poHint').click(), 0`); await sleep(400); await shot('5-indice');
+  const tip = await pj(`document.getElementById('poTip').textContent`); if (!/^(Cette île|Aucun pont)/.test(tip)) throw new Error('indice : ' + tip);
+  const nb = await C('return [...po.br.values()].reduce((a, c) => a + c, 0);'); await pj(`document.getElementById('poHint').click(), 0`); await sleep(100);
+  if (await C('return [...po.br.values()].reduce((a, c) => a + c, 0);') !== nb + 1) throw new Error('le second clic sur INDICE devait poser le pont');
   await size(0);
   const errs = await pj(`window.__e.join(' | ')`); if (errs) throw new Error('erreur : ' + errs);
   await pj(`document.getElementById('gFs').click(), 0`); await sleep(700);

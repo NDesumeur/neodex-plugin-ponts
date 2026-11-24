@@ -4,6 +4,10 @@ A logic puzzle: connect all the islands of an archipelago with straight bridges.
 
 *Version française : [README.md](README.md)*
 
+## Daily archipelago and forced bridge (new in 1.2.0)
+
+**Daily archipelago**: one 9 × 9 archipelago, the same for everyone each day, with a day streak. **Hint**: it looks for a forced bridge and explains it (“this island still needs 3 bridges, and its other neighbours can only take 2: one bridge to the yellow island is forced”), with both islands circled; a second click places the bridge. An island with too many bridges is pointed out first.
+
 ## Rules
 
 - A bridge links two neighbouring islands in a straight line, horizontally or vertically.

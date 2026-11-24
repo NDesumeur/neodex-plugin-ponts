@@ -1,16 +1,19 @@
 {
   "id": "neodex.ponts",
   "name": "Ponts",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "author": "NDesumeur",
-  "description": "Casse-tête logique : relie toutes les îles par des ponts droits, un ou deux entre deux îles voisines, sans croisement, pour former un seul archipel. Le chiffre de chaque île dit combien de ponts en partent ; elle devient verte quand c'est juste. Glisser pour poser un pont, retour arrière pour annuler, archipels au hasard de 7 × 7 ou 9 × 9 et record de temps. Archipels de 7 × 7 à 13 × 13, plein écran et jeu à la taille de l'écran.",
+  "description": "Casse-tête logique : relie toutes les îles par des ponts droits, un ou deux entre deux îles voisines, sans croisement, pour former un seul archipel. Le chiffre de chaque île dit combien de ponts en partent ; elle devient verte quand c'est juste. Glisser pour poser un pont, retour arrière pour annuler, archipels au hasard de 7 × 7 ou 9 × 9 et record de temps. Archipels de 7 × 7 à 13 × 13, plein écran et jeu à la taille de l'écran. Archipel du jour avec série de jours, et un indice qui explique le pont forcé.",
   "icon": "icon.png",
   "entry": "index.js",
   "view": "ponts",
   "neobase": ">=4.0.0",
   "type": "app",
   "category": "Jeux",
-  "compatibility": ["windows", "linux"],
+  "compatibility": [
+    "windows",
+    "linux"
+  ],
   "syncMode": "aucune",
   "syncInfo": "Rien n'est synchronisé : tes records restent sur cet appareil.",
   "mobile": false,

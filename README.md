@@ -4,6 +4,10 @@ Un casse-tête logique : relie toutes les îles d'un archipel par des ponts droi
 
 *English version: [README.en.md](README.en.md)*
 
+## Archipel du jour et pont forcé (nouveau en 1.2.0)
+
+**Archipel du jour** : un archipel 9 × 9 le même pour tout le monde chaque jour, avec une série de jours. **Indice** : il cherche un pont forcé et l’explique (« cette île a encore besoin de 3 ponts, et ses autres voisines ne peuvent en prendre que 2 : un pont vers l’île en jaune est forcé »), les deux îles entourées ; un second clic pose le pont. Une île qui a trop de ponts est signalée d’abord.
+
 ## Les règles
 
 - Un pont relie deux îles voisines en ligne droite, à l'horizontale ou à la verticale.

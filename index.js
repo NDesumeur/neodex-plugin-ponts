@@ -6,11 +6,15 @@ const HTML = `<div class="appWrap wide">
     <div class="gSide">
       <div class="sysCard"><b>RECORDS</b><div class="gStats" id="gStats"></div></div>
       <div class="row"><button class="btn main" id="gNew">NOUVELLE PARTIE</button><button class="btn" id="gFs">PLEIN ÉCRAN</button></div>
+      <div class="row"><button class="btn" id="poDaily">ARCHIPEL DU JOUR</button><button class="btn" id="poHint">INDICE</button></div>
+      <div class="hint poTip" id="poTip"></div>
       <label class="row">Archipel <select id="poSize" class="f"><option value="0">7 × 7</option><option value="1">9 × 9</option><option value="2">11 × 11</option><option value="3">13 × 13</option></select></label>
       <div class="hint">Une île devient verte quand elle a juste son nombre de ponts, rouge quand elle en a trop.</div><div class="hint">Les ponts ne se croisent jamais, et toutes les îles doivent former un seul archipel.</div>
     </div></div>
 </div>`;
-const CSS = `.gMain{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+const CSS = `.poTip{background:#0c2450;color:#e8eeff;border-left:4px solid #ffd84a;padding:6px 10px}
+.poTip:empty{display:none}
+.gMain{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
 .gameBox{display:grid;place-items:center;padding:10px;background:#05010b;flex:1 1 360px;min-width:min(100%,320px);position:relative}
 .gameBox:fullscreen{padding:0}
 .gameBox:fullscreen canvas{width:min(100vw,calc(100vh * 260 / 268))}
@@ -334,7 +338,20 @@ const showStats = rows => $('gStats').replaceChildren(...rows.flatMap(([a, b]) =
 /* ---------- Ponts : relier toutes les îles par des ponts droits (un ou deux entre deux îles), sans croisement. Le chiffre d'une île dit combien de ponts en partent. ---------- */
 const PO = {C: 20, Y0: 24};
 const poCell = n => Math.min(32, Math.floor((W - 24) / n));
-const pos = gstore('ponts', {size: 0, done: 0});
+const pos = gstore('ponts', {size: 0, done: 0}); pos.daily ??= {last: '', streak: 0, best: 0};
+const poDay = (k = 0) => { const d = new Date(Date.now() - k * 864e5); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+// l'indice « ce pont est forcé » : une île qui a encore besoin de K ponts, quand ses autres voisines ne peuvent pas tous les prendre
+function poForced(isl, br, n) {
+  const cnt = i => [...br].reduce((a, [k, c]) => a + (k.split('-').map(Number).includes(i) ? c : 0), 0), left = isl.map((s, i) => s.n - cnt(i));
+  for (let i = 0; i < isl.length; i++) {
+    if (left[i] <= 0) continue;
+    const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => poNeighbor(isl, i, dx, dy, n)).filter(j => j >= 0).map(j => { const c = br.get(poKey(i, j)) || 0; return {j, cap: !c && poCross(isl, br, i, j) ? 0 : Math.max(0, Math.min(2 - c, left[j], left[i]))}; });
+    const tot = nb.reduce((a, o) => a + o.cap, 0);
+    for (const o of nb) { const f = left[i] - (tot - o.cap); if (o.cap > 0 && f > 0) return {i, j: o.j, k: f, left: left[i], others: tot - o.cap,
+      text: 'Cette île a encore besoin de ' + left[i] + (left[i] > 1 ? ' ponts' : ' pont') + ', et ses autres voisines ne peuvent en prendre que ' + (tot - o.cap) + ' : ' + (f > 1 ? 'deux ponts vers l’île en jaune sont forcés.' : 'un pont vers l’île en jaune est forcé.')}; }
+  }
+  return null;
+}
 const PO_SIZES = [7, 9, 11, 13];
 let po = null;
 const poKey = (i, j) => i < j ? i + '-' + j : j + '-' + i;
@@ -361,9 +378,9 @@ function poGen(n, seed) {  // on fait pousser un archipel relié, pont après po
   isl.forEach((s, i) => s.n = [...br].reduce((a, [k, c]) => a + (k.split('-').map(Number).includes(i) ? c : 0), 0));
   return {isl, sol: br};
 }
-function poNew() {
-  const n = PO_SIZES[pos.size] || 7, {isl, sol} = poGen(n, Math.floor(Math.random() * 1e9)); PO.C = poCell(n);
-  po = Object.assign(po || {tick: 0, raf: 0}, {mode: 'play', n, isl, sol, br: new Map(), X0: Math.floor((W - n * PO.C) / 2), drag: null, t0: performance.now(), endAt: 0, hist: []}); poInfo();
+function poNew(daily = false) {
+  const n = daily ? 9 : PO_SIZES[pos.size] || 7, {isl, sol} = poGen(n, daily ? +poDay().replace(/-/g, '') : Math.floor(Math.random() * 1e9)); PO.C = poCell(n); poHelp = null; $('poTip').textContent = '';
+  po = Object.assign(po || {tick: 0, raf: 0}, {mode: 'play', n, isl, sol, br: new Map(), X0: Math.floor((W - n * PO.C) / 2), drag: null, t0: performance.now(), endAt: 0, hist: [], daily}); poInfo();
 }
 const poCount = i => [...po.br].reduce((a, [k, c]) => a + (k.split('-').map(Number).includes(i) ? c : 0), 0);
 function poDone() {
@@ -371,11 +388,13 @@ function poDone() {
   const seen = new Set([0]), q = [0]; while (q.length) { const i = q.pop(); for (const [k, c] of po.br) { if (!c) continue; const [a, b] = k.split('-').map(Number); const o = a === i ? b : b === i ? a : -1; if (o >= 0 && !seen.has(o)) { seen.add(o); q.push(o); } } }
   return seen.size === po.isl.length;
 }
+let poHelp = null;  // l'indice en cours : {i, j}
 function poToggle(i, j) {
-  const k = poKey(i, j), c = po.br.get(k) || 0;
+  const k = poKey(i, j), c = po.br.get(k) || 0; if (poHelp) { poHelp = null; $('poTip').textContent = ''; }
   if (!c && poCross(po.isl, po.br, i, j)) { beep(140, .1, 'square', 0, .05); return; }
   po.hist.push([k, c]); po.br.set(k, (c + 1) % 3); beep(c === 2 ? 300 : 500 + c * 150, .04, 'triangle', 0, .06);
-  if (poDone()) { po.mode = 'won'; po.endAt = po.tick; po.wonMs = performance.now(); pos.done++; const sec = Math.round((po.wonMs - po.t0) / 1000), kk = 'ponts' + po.n; if (!games.best[kk] || sec < games.best[kk]) games.best[kk] = sec; saveGames(); poInfo(); [523, 659, 784, 1047].forEach((f, i2) => setTimeout(() => beep(f, .14, 'triangle'), i2 * 100)); }
+  if (poDone()) { po.mode = 'won'; po.endAt = po.tick; po.wonMs = performance.now(); pos.done++; if (po.daily && pos.daily.last !== poDay()) { const d = pos.daily; d.streak = d.last === poDay(1) ? d.streak + 1 : 1; d.best = Math.max(d.best, d.streak); d.last = poDay(); }
+    const sec = Math.round((po.wonMs - po.t0) / 1000), kk = po.daily ? 'pontsJour' : 'ponts' + po.n; if (!games.best[kk] || sec < games.best[kk]) games.best[kk] = sec; saveGames(); poInfo(); [523, 659, 784, 1047].forEach((f, i2) => setTimeout(() => beep(f, .14, 'triangle'), i2 * 100)); }
 }
 const poXY = s => [po.X0 + s.x * PO.C + PO.C / 2, PO.Y0 + s.y * PO.C + PO.C / 2];
 const PO_ISLE = (rim, sand) => cnv(17, 17, b => { for (let y = 0; y < 17; y++) for (let x = 0; x < 17; x++) { const d = Math.hypot(x - 8, y - 8); if (d < 8.6) px(b, d > 7.4 ? '#05010b' : d > 6.2 ? rim : (x + y) % 3 === 0 && d > 3 ? '#d8c088' : sand, x, y); } px(b, '#fff4d0', 5, 4, 3, 1); });
@@ -389,9 +408,12 @@ function poDraw() {
     for (const off of c === 1 ? [0] : [-3, 3]) for (let t = lo; t <= hi; t++) { const X = h ? t : x1 + off, Y = h ? y1 + off : t; px(g, '#05010b', X - (h ? 0 : 1), Y - (h ? 1 : 0), h ? 1 : 3, h ? 3 : 1); px(g, t % 3 ? '#c8904a' : '#8a5428', X, Y, 1, 1); }
   }
   if (po.drag?.to >= 0) { const [x1, y1] = poXY(po.isl[po.drag.from]), [x2, y2] = poXY(po.isl[po.drag.to]); for (let t = 0; t <= 1; t += .04) px(g, '#ffffff', x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, 1, 1); }
+  if (poHelp && po.mode === 'play') { const ring = (i, col) => { const [x, y] = poXY(po.isl[i]); g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 11, 0, 7); g.stroke(); };
+    if (poHelp.j >= 0) { ring(poHelp.j, (po.tick >> 3) % 2 ? '#ffd84a' : '#fff4b0'); const [x1, y1] = poXY(po.isl[poHelp.i]), [x2, y2] = poXY(po.isl[poHelp.j]); for (let t = .1; t <= .9; t += .06) px(g, '#ffd84a', x1 + (x2 - x1) * t - 1, y1 + (y2 - y1) * t - 1, 2, 2); }
+    ring(poHelp.i, '#ffffff'); }
   po.isl.forEach((s, i) => { const c = poCount(i), [x, y] = poXY(s); g.drawImage(c === s.n ? PO_IS.ok : c > s.n ? PO_IS.over : PO_IS.wait, x - 8, y - 8); pxFont(g, String(s.n), x + 1, y + 4, '#2a1a0a', 7, 'center'); });
   const sec = Math.floor(((po.mode === 'won' ? po.wonMs : performance.now()) - po.t0) / 1000);
-  pxFont(g, po.isl.length + ' îles', Math.max(6, po.X0), 14, '#c8d8ff', 6); pxFont(g, clock(sec), Math.min(W - 6, po.X0 + po.n * PO.C), 14, '#ffffff', 6, 'right');
+  pxFont(g, (po.daily ? 'DU JOUR · ' : '') + po.isl.length + ' îles', Math.max(6, po.X0), 14, po.daily ? '#ffd84a' : '#c8d8ff', 6); pxFont(g, clock(sec), Math.min(W - 6, po.X0 + po.n * PO.C), 14, '#ffffff', 6, 'right');
   if (po.mode === 'won' && po.tick - po.endAt > 20) gameText(g, W, [['ARCHIPEL RELIÉ !', '#5fdf6a', 10], ['en ' + clock(sec), '#ffffff'], ['Clic : nouvel archipel', '#ffd84a']], H / 2 - 10);
 }
 const poAt = e => { const [mx, my] = cpos(e); return po.isl.findIndex(s => { const [x, y] = poXY(s); return Math.hypot(mx - x, my - y) < Math.max(9, PO.C / 2); }); };
@@ -400,14 +422,27 @@ cv.onpointerdown = e => { e.preventDefault(); if (!po) return; if (po.mode === '
 cv.onpointermove = e => { if (po?.drag) po.drag.to = poDir(po.drag.from, e); };
 cv.onpointerup = () => { if (po?.drag) { if (po.drag.to >= 0) poToggle(po.drag.from, po.drag.to); po.drag = null; } };
 document.addEventListener('keydown', e => { if (!keyOk(e) || !po) return; if (e.key === 'Backspace') { e.preventDefault(); const h = po.hist.pop(); if (h && po.mode === 'play') po.br.set(h[0], h[1]); } });
-function poInfo() { const b = games.best['ponts' + PO_SIZES[pos.size]]; showStats([['Record ' + PO_SIZES[pos.size] + ' × ' + PO_SIZES[pos.size], b ? clock(b) : '—'], ['Archipels reliés', pos.done]]); $('poSize').value = pos.size; }
+function poInfo() { const b = games.best['ponts' + PO_SIZES[pos.size]], d = pos.daily; showStats([['Record ' + PO_SIZES[pos.size] + ' × ' + PO_SIZES[pos.size], b ? clock(b) : '—'], ['Archipels reliés', pos.done], ['Archipel du jour', d.last === poDay() ? 'fait ✓' : 'à faire'], ['Série de jours', (d.last === poDay() || d.last === poDay(1) ? d.streak : 0) + ' (record ' + d.best + ')']]); $('poSize').value = pos.size; }
 $('gNew').onclick = () => { poNew(); $('gNew').blur(); };
+$('poDaily').onclick = () => { poNew(true); $('poDaily').blur(); };
+$('poHint').onclick = () => {  // une île qui déborde d'abord ; sinon un pont forcé, expliqué ; un second clic le pose
+  $('poHint').blur(); if (!po || po.mode !== 'play') return;
+  const over = po.isl.findIndex((s, i) => poCount(i) > s.n); if (over >= 0) { poHelp = {i: over, j: -1}; $('poTip').textContent = 'L’île entourée a trop de ponts : enlève-en un.'; return; }
+  if (poHelp?.j >= 0) { const h = poHelp; poToggle(h.i, h.j); return; }
+  const f = poForced(po.isl, po.br, po.n);
+  if (f) { poHelp = f; $('poTip').textContent = f.text + ' (INDICE encore une fois pour le poser.)'; }
+  else { const k = [...po.sol].find(([k, c]) => (po.br.get(k) || 0) < c); if (!k) return; const [i, j] = k[0].split('-').map(Number); poHelp = {i, j}; $('poTip').textContent = 'Aucun pont n’est forcé tout seul ici : il faut regarder plusieurs îles ensemble (par exemple, garder l’archipel relié). Ce pont-là est dans la solution.'; }
+};
 $('gFs').onclick = () => { $('gFs').blur(); try { document.fullscreenElement ? document.exitFullscreen() : cv.parentElement.requestFullscreen?.().catch(() => {}); } catch {} };
 cv.__po = {st: () => po, toggle: (i, j) => poToggle(i, j), xy: s => poXY(s), W, H};
 $('poSize').onchange = () => { pos.size = +$('poSize').value; saveGames(); poNew(); $('poSize').blur(); };
 {  // vérification : la solution du générateur est acceptée (chiffres justes, sans croisement, tout relié)
   let ok = true; for (const [n, s] of [[9, 1], [9, 2], [9, 3], [9, 99], [11, 4], [11, 5], [13, 6], [13, 7], [13, 8]]) { const {isl, sol} = poGen(n, s), keep = po; po = {isl, br: sol}; ok &&= isl.length > n * n / 6 && poDone() && ![...sol.keys()].some(k => { const [a, b] = k.split('-').map(Number), m = new Map(sol); m.delete(k); return poCross(isl, m, a, b); }); po = keep; }
-  console.assert(ok, 'ponts');
+  { const isl = [{x: 0, y: 0, n: 2}, {x: 3, y: 0, n: 2}], f = poForced(isl, new Map(), 7); ok &&= f?.k === 2 && f.i === 0 && f.j === 1; }
+  { const isl = [{x: 0, y: 0, n: 3}, {x: 3, y: 0, n: 2}, {x: 0, y: 3, n: 1}], f = poForced(isl, new Map(), 7); ok &&= f?.i === 0 && f.j === 1 && f.k === 2; }
+  for (const sd of [11, 12, 13]) { const {isl} = poGen(9, sd), br = new Map(); for (let k = 0, f; k < 80 && (f = poForced(isl, br, 9)); k++) br.set(poKey(f.i, f.j), (br.get(poKey(f.i, f.j)) || 0) + 1);
+    ok &&= [...br].every(([, c]) => c <= 2) && isl.every((t, i) => [...br].reduce((a2, [k, c]) => a2 + (k.split('-').map(Number).includes(i) ? c : 0), 0) <= t.n); }
+  console.assert(ok, 'ponts'); cv.dataset.selfcheck = ok ? 'ok' : 'raté';
 }
 ctx.onOpen(() => { if (!po) poNew(); gameLoop(po, 'ponts', () => {}, poDraw); poInfo(); });
 
