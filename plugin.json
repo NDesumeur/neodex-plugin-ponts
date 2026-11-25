@@ -1,7 +1,7 @@
 {
   "id": "neodex.ponts",
   "name": "Ponts",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "author": "NDesumeur",
   "description": "Casse-tête logique : relie toutes les îles par des ponts droits, un ou deux entre deux îles voisines, sans croisement, pour former un seul archipel. Le chiffre de chaque île dit combien de ponts en partent ; elle devient verte quand c'est juste. Glisser pour poser un pont, retour arrière pour annuler, archipels au hasard de 7 × 7 ou 9 × 9 et record de temps. Archipels de 7 × 7 à 13 × 13, plein écran et jeu à la taille de l'écran. Archipel du jour avec série de jours, et un indice qui explique le pont forcé.",
   "icon": "icon.png",
@@ -22,5 +22,75 @@
   "sdk": "2.1.0",
   "permissions": [
     "storage"
+  ],
+  "succes": [
+    {
+      "id": "premier",
+      "nom": "Premier archipel",
+      "texte": "Relier un premier archipel"
+    },
+    {
+      "id": "vingt5",
+      "nom": "Bâtisseur de ponts",
+      "texte": "Relier 25 archipels"
+    },
+    {
+      "id": "cent",
+      "nom": "Ingénieur des îles",
+      "texte": "Relier 100 archipels"
+    },
+    {
+      "id": "grand",
+      "nom": "Grand archipel",
+      "texte": "Relier un archipel 13 × 13"
+    },
+    {
+      "id": "jour",
+      "nom": "L'archipel du jour",
+      "texte": "Relier l'archipel du jour"
+    },
+    {
+      "id": "jour7",
+      "nom": "Une semaine d'îles",
+      "texte": "Relier l'archipel du jour 7 jours de suite"
+    },
+    {
+      "id": "eclair",
+      "nom": "Pont express",
+      "texte": "Relier un archipel 7 × 7 en moins d'une minute",
+      "cache": true
+    }
+  ],
+  "records": [
+    {
+      "id": "t7",
+      "nom": "7 × 7",
+      "sens": "bas",
+      "format": "temps"
+    },
+    {
+      "id": "t9",
+      "nom": "9 × 9",
+      "sens": "bas",
+      "format": "temps"
+    },
+    {
+      "id": "t11",
+      "nom": "11 × 11",
+      "sens": "bas",
+      "format": "temps"
+    },
+    {
+      "id": "t13",
+      "nom": "13 × 13",
+      "sens": "bas",
+      "format": "temps"
+    },
+    {
+      "id": "serie",
+      "nom": "Plus longue série de jours",
+      "sens": "haut",
+      "format": "nombre"
+    }
   ]
 }

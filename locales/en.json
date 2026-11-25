@@ -81,5 +81,22 @@
  "(INDICE encore une fois pour le poser.)": "(HINT again to place it.)",
  "raté": "failed",
  "vérification interne": "self-check",
- "Casse-tête logique : relie toutes les îles par des ponts droits, un ou deux entre deux îles voisines, sans croisement, pour former un seul archipel. Le chiffre de chaque île dit combien de ponts en partent ; elle devient verte quand c'est juste. Glisser pour poser un pont, retour arrière pour annuler, archipels au hasard de 7 × 7 ou 9 × 9 et record de temps. Archipels de 7 × 7 à 13 × 13, plein écran et jeu à la taille de l'écran. Archipel du jour avec série de jours, et un indice qui explique le pont forcé.": "A logic puzzle: connect all the islands with straight bridges, one or two between neighbouring islands, with no crossings, to form a single archipelago. Each island's number says how many bridges leave it; it turns green when right. Drag to place a bridge, Backspace to undo, random 7 × 7 or 9 × 9 archipelagos and time records. Archipelagos from 7 × 7 to 13 × 13, full screen and a game that fits the screen. Daily archipelago with a day streak, and a hint that explains the forced bridge."
+ "Casse-tête logique : relie toutes les îles par des ponts droits, un ou deux entre deux îles voisines, sans croisement, pour former un seul archipel. Le chiffre de chaque île dit combien de ponts en partent ; elle devient verte quand c'est juste. Glisser pour poser un pont, retour arrière pour annuler, archipels au hasard de 7 × 7 ou 9 × 9 et record de temps. Archipels de 7 × 7 à 13 × 13, plein écran et jeu à la taille de l'écran. Archipel du jour avec série de jours, et un indice qui explique le pont forcé.": "A logic puzzle: connect all the islands with straight bridges, one or two between neighbouring islands, with no crossings, to form a single archipelago. Each island's number says how many bridges leave it; it turns green when right. Drag to place a bridge, Backspace to undo, random 7 × 7 or 9 × 9 archipelagos and time records. Archipelagos from 7 × 7 to 13 × 13, full screen and a game that fits the screen. Daily archipelago with a day streak, and a hint that explains the forced bridge.",
+ "Premier archipel": "First archipelago",
+ "Relier un premier archipel": "Connect your first archipelago",
+ "Bâtisseur de ponts": "Bridge builder",
+ "Relier 25 archipels": "Connect 25 archipelagos",
+ "Ingénieur des îles": "Island engineer",
+ "Relier 100 archipels": "Connect 100 archipelagos",
+ "Grand archipel": "Great archipelago",
+ "Relier un archipel 13 × 13": "Connect a 13 × 13 archipelago",
+ "L'archipel du jour": "Archipelago of the day",
+ "Relier l'archipel du jour": "Connect the archipelago of the day",
+ "Une semaine d'îles": "A week of islands",
+ "Relier l'archipel du jour 7 jours de suite": "Connect the archipelago of the day 7 days in a row",
+ "Pont express": "Express bridge",
+ "Relier un archipel 7 × 7 en moins d'une minute": "Connect a 7 × 7 archipelago in under a minute",
+ "7 × 7": "7 × 7",
+ "9 × 9": "9 × 9",
+ "Plus longue série de jours": "Longest day streak"
 }

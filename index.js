@@ -303,6 +303,9 @@ export default async function (ctx) {
   const saveGames = () => { clearTimeout(gamesTimer); gamesTimer = setTimeout(() => { gamesTimer = null; folder.write('games', games).catch(() => {}); }, 500); };
   const best = (k, v) => { const b = games.best[k]; if (b == null || v > b) { games.best[k] = v; saveGames(); return true; } return false; };
   const gstore = (k, init) => (games[k] ??= init);
+  // les trophées de NeoDex (3.4.8 et plus) : succès et records déclarés dans plugin.json ; sur un NeoDex plus ancien, rien ne se passe
+  const trophy = id => { ctx.games?.unlock(id).catch(() => {}); };
+  const trophyRecord = (id, v) => { if (v != null && Number.isFinite(+v)) ctx.games?.record(id, +v).catch(() => {}); };
 function gameLoop(st, appKey, update, draw) {
   cancelAnimationFrame(st.raf);
   const STEP = 1000 / 60; let acc = 0, last = performance.now();
@@ -422,7 +425,8 @@ cv.onpointerdown = e => { e.preventDefault(); if (!po) return; if (po.mode === '
 cv.onpointermove = e => { if (po?.drag) po.drag.to = poDir(po.drag.from, e); };
 cv.onpointerup = () => { if (po?.drag) { if (po.drag.to >= 0) poToggle(po.drag.from, po.drag.to); po.drag = null; } };
 document.addEventListener('keydown', e => { if (!keyOk(e) || !po) return; if (e.key === 'Backspace') { e.preventDefault(); const h = po.hist.pop(); if (h && po.mode === 'play') po.br.set(h[0], h[1]); } });
-function poInfo() { const b = games.best['ponts' + PO_SIZES[pos.size]], d = pos.daily; showStats([['Record ' + PO_SIZES[pos.size] + ' × ' + PO_SIZES[pos.size], b ? clock(b) : '—'], ['Archipels reliés', pos.done], ['Archipel du jour', d.last === poDay() ? 'fait ✓' : 'à faire'], ['Série de jours', (d.last === poDay() || d.last === poDay(1) ? d.streak : 0) + ' (record ' + d.best + ')']]); $('poSize').value = pos.size; }
+function poInfo() {
+  setTimeout(poTrophies); const b = games.best['ponts' + PO_SIZES[pos.size]], d = pos.daily; showStats([['Record ' + PO_SIZES[pos.size] + ' × ' + PO_SIZES[pos.size], b ? clock(b) : '—'], ['Archipels reliés', pos.done], ['Archipel du jour', d.last === poDay() ? 'fait ✓' : 'à faire'], ['Série de jours', (d.last === poDay() || d.last === poDay(1) ? d.streak : 0) + ' (record ' + d.best + ')']]); $('poSize').value = pos.size; }
 $('gNew').onclick = () => { poNew(); $('gNew').blur(); };
 $('poDaily').onclick = () => { poNew(true); $('poDaily').blur(); };
 $('poHint').onclick = () => {  // une île qui déborde d'abord ; sinon un pont forcé, expliqué ; un second clic le pose
@@ -443,6 +447,13 @@ $('poSize').onchange = () => { pos.size = +$('poSize').value; saveGames(); poNew
   for (const sd of [11, 12, 13]) { const {isl} = poGen(9, sd), br = new Map(); for (let k = 0, f; k < 80 && (f = poForced(isl, br, 9)); k++) br.set(poKey(f.i, f.j), (br.get(poKey(f.i, f.j)) || 0) + 1);
     ok &&= [...br].every(([, c]) => c <= 2) && isl.every((t, i) => [...br].reduce((a2, [k, c]) => a2 + (k.split('-').map(Number).includes(i) ? c : 0), 0) <= t.n); }
   console.assert(ok, 'ponts'); cv.dataset.selfcheck = ok ? 'ok' : 'raté';
+}
+// les trophées, tirés des statistiques et des records gardés (aussi à l'ouverture : ce qui a été fait avant compte)
+function poTrophies() {
+  const b = games.best, d = pos.daily, sig = [pos.done, d.best, ...PO_SIZES.map(n => b['ponts' + n])].join(); if (sig === poTrophies.sig) return; poTrophies.sig = sig;
+  for (const n of PO_SIZES) trophyRecord('t' + n, b['ponts' + n]); trophyRecord('serie', d.best || null);
+  if (pos.done >= 1) trophy('premier'); if (pos.done >= 25) trophy('vingt5'); if (pos.done >= 100) trophy('cent'); if (b.ponts13) trophy('grand');
+  if (d.best >= 1) trophy('jour'); if (d.best >= 7) trophy('jour7'); if (b.ponts7 < 60) trophy('eclair');
 }
 ctx.onOpen(() => { if (!po) poNew(); gameLoop(po, 'ponts', () => {}, poDraw); poInfo(); });
 
